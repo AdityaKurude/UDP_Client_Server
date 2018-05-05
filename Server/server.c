@@ -211,7 +211,7 @@ int main(void)
     create_database();
 
     while(1) {
-        printf(" Waiting for commands ... \n");
+        printf(" Waiting for next command . . . \n");
         fflush(stdout);
 
         //receive data, a blocking call
