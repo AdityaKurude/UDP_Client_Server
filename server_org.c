@@ -8,7 +8,9 @@
 #include<sys/socket.h>
  
 #define BUFLEN 512  //Max length of buffer
-#define PORT 8888   //The port on which to listen for incoming data
+#define IP      "127.0.0.1"
+#define SND_PORT 5001   //The port on which to listen for incoming data
+#define REC_PORT 5000   //The port on which to listen for incoming data
  
 void die(char *s)
 {
@@ -18,7 +20,7 @@ void die(char *s)
  
 int main(void)
 {
-    struct sockaddr_in si_me, si_other;
+    struct sockaddr_in si_me, si_other, addr;
      
     int s, i, slen = sizeof(si_other) , recv_len;
     char buf[BUFLEN];
@@ -33,9 +35,14 @@ int main(void)
     memset((char *) &si_me, 0, sizeof(si_me));
      
     si_me.sin_family = AF_INET;
-    si_me.sin_port = htons(PORT);
+    si_me.sin_port = htons(REC_PORT);
     si_me.sin_addr.s_addr = htonl(INADDR_ANY);
-     
+
+    memset(&addr, 0, sizeof(addr));
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = inet_addr(IP);
+    addr.sin_port = htons(SND_PORT);
+
     //bind socket to port
     if( bind(s , (struct sockaddr*)&si_me, sizeof(si_me) ) == -1)
     {
@@ -59,10 +66,13 @@ int main(void)
         printf("Data: %s\n" , buf);
          
         //now reply the client with the same data
-        if (sendto(s, buf, recv_len, 0, (struct sockaddr*) &si_other, slen) == -1)
-        {
-            die("sendto()");
+
+        if (sendto(s, buf, recv_len, 0, (struct sockaddr *) &addr,
+                sizeof(addr)) < 0) {
+            perror("sendto");
+            exit(1);
         }
+
     }
  
     close(s);
