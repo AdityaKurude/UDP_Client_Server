@@ -1,12 +1,14 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
+#include<arpa/inet.h>
+#include<sys/socket.h>
 #include <sqlite3.h>
-#include <arpa/inet.h>
-#include <sys/socket.h>
 
 #define BUFLEN 512  //Max length of buffer
-#define PORT 8888   //The port on which to listen for incoming data
+#define IP      "127.0.0.1"
+#define SND_PORT 5000   //port to send data
+#define REC_PORT 5001   //port on which to listen for incoming data
 
 #define SET_CMD "SetName"
 #define GET_CMD "GetName"
@@ -26,13 +28,10 @@ char out_name[BUFLEN];
 static int callback(void *NotUsed, int argc, char **argv, char **azColName) {
     int i;
     for(i = 0; i<argc; i++) {
-//        printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
-
         if( (0 == strcmp("Output",azColName[i])) && (0 != strcmp("",argv[i]))) {
             strcpy(out_name,argv[i]);
         }
     }
-    printf("\n");
     return 0;
 }
 
@@ -142,39 +141,11 @@ void get_info(char* str_name) {
     }
 
     /* Create SQL statement */
-    //   sql = "SELECT * from COMPANY";
-
-    /* Create SQL statement */
-
-
     sql = sqlite3_mprintf("SELECT *," \
                           " CASE " \
                           " WHEN FIRST_NAME == '%q' OR LAST_NAME == '%q' AND FIRST_NAME == '%q' THEN LAST_NAME " \
                           " WHEN FIRST_NAME == '%q' OR LAST_NAME == '%q' AND LAST_NAME == '%q' THEN FIRST_NAME " \
                           " ELSE '' END as Output  FROM TABLE_NAME ;", str_name, str_name, str_name, str_name, str_name, str_name);
-
-
-    //        sql = sqlite3_mprintf("SELECT * FROM TABLE_NAME" \
-    //                          " WHERE FIRST_NAME == '%q' OR LAST_NAME == '%q'  ;", str_name, str_name);
-
-
-    //        sql = sqlite3_mprintf(        " SELECT * " \
-    //                                      " FROM TABLE_NAME " \
-    //                                      " WHERE EXISTS (SELECT * " \
-    //                                                    " FROM TABLE_NAME " \
-    //                                                    " WHERE FIRST_NAME == 'Dora' OR LAST_NAME == 'Dora'); ");
-
-    // gives all names as output
-    //    sql = sqlite3_mprintf("SELECT FIRST_NAME,LAST_NAME," \
-    //                          "CASE " \
-    //                          " WHEN FIRST_NAME IS NOT NULL AND FIRST_NAME == '%q' THEN LAST_NAME " \
-    //                          " WHEN LAST_NAME IS NOT NULL AND LAST_NAME == '%q' THEN FIRST_NAME " \
-    //                          " ELSE '' END as Output FROM TABLE_NAME;", str_name);
-
-    //    sql = sqlite3_mprintf("SELECT FIRST_NAME,LAST_NAME, CASE WHEN FIRST_NAME IS NOT NULL AND FIRST_NAME == '%q' THEN 'NAME present' ELSE 'wahhhhhhhhhhhh Name NULL' END as LAST_NAME FROM TABLE_NAME;", str_name);
-
-    //    sql = "SELECT FIRST_NAME,LAST_NAME CASE WHEN FIRST_NAME IS NOT NULL AND FIRST_NAME == '%q' THEN 'NAME present' ELSE 'wahhhhhhhhhhhh Name NULL' END as NAME FROM COMPANY";
-
 
     /* Execute SQL statement */
     rc = sqlite3_exec(db, sql, callback, (void*)data, &zErrMsg);
@@ -202,9 +173,9 @@ int find_missing_num(char* str_numbers) {
 
 int main(void)
 {
-    struct sockaddr_in si_me, si_other;
+    struct sockaddr_in si_me, si_other, addr;
 
-    int s, i, slen = sizeof(si_other) , recv_len;
+    int s, slen = sizeof(si_other) , recv_len;
     char buf[BUFLEN];
 
     //create a UDP socket
@@ -215,18 +186,21 @@ int main(void)
 
     // zero out the structure
     memset((char *) &si_me, 0, sizeof(si_me));
-    memset(buf, 0, BUFLEN);
 
     si_me.sin_family = AF_INET;
-    si_me.sin_port = htons(PORT);
+    si_me.sin_port = htons(REC_PORT);
     si_me.sin_addr.s_addr = htonl(INADDR_ANY);
+
+    memset(&addr, 0, sizeof(addr));
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = inet_addr(IP);
+    addr.sin_port = htons(SND_PORT);
 
     //bind socket to port
     if( bind(s , (struct sockaddr*)&si_me, sizeof(si_me) ) == -1)
     {
         exit_error("bind");
     }
-
     create_database();
 
     //keep listening for data
@@ -242,7 +216,7 @@ int main(void)
         }
 
         //print details of the client/peer and the data received
-        printf("Received packet from %s:%d\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port));
+        printf("Server Received packet from %s:%d\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port));
         printf("Data: %s\n" , buf);
 
 
@@ -282,11 +256,9 @@ int main(void)
             memset(buf, 0, BUFLEN);
             strcpy(buf, "Err");
         }
-
-
         //now reply the client with the same data
-        if (sendto(s, buf, BUFLEN, 0, (struct sockaddr*) &si_other, slen) == -1)
-        {
+        if (sendto(s, buf, recv_len, 0, (struct sockaddr *) &addr,
+                sizeof(addr)) < 0) {
             exit_error("sendto()");
         }
         // clear the buffer
