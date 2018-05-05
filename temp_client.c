@@ -9,8 +9,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#define SND_PORT    5000
-#define REC_PORT    5001
+#define SND_PORT    5001
+#define REC_PORT    5000
 
 #define IP      "127.0.0.1"
 #define BUFLEN 512  //Max length of buffer
@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
         {
             die("recvfrom()");
         }
-
+        printf("Client Received packet from %s:%d\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port));
         puts(buf);
     }
     return 0;

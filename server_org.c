@@ -9,8 +9,8 @@
  
 #define BUFLEN 512  //Max length of buffer
 #define IP      "127.0.0.1"
-#define SND_PORT 5001   //The port on which to listen for incoming data
-#define REC_PORT 5000   //The port on which to listen for incoming data
+#define SND_PORT 5000   //The port on which to listen for incoming data
+#define REC_PORT 5001   //The port on which to listen for incoming data
  
 void die(char *s)
 {
@@ -62,7 +62,7 @@ int main(void)
         }
          
         //print details of the client/peer and the data received
-        printf("Received packet from %s:%d\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port));
+        printf("Server Received packet from %s:%d\n", inet_ntoa(si_other.sin_addr), ntohs(si_other.sin_port));
         printf("Data: %s\n" , buf);
          
         //now reply the client with the same data
