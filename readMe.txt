@@ -4,6 +4,7 @@ sudo apt-get install sqlite3 libsqlite3-dev
 
 Folder Server and Client contains their respective makefiles for easy compilation. Release build can be done using simply "make", however debug build can be obtained using "make debug" command.
 
+Folder SQLite and Sub_Tasks contains some trials done before all the functionality is integrated, hence they should be ignored and can only be referred in case someone is interested to build the similar project from scratch.
 
 Following is a short description of the task which can be performed with this client server based system.
 
