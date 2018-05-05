@@ -21,10 +21,16 @@ void exit_error(char *s)
     exit(1);
 }
 
+char out_name[BUFLEN];
+
 static int callback(void *NotUsed, int argc, char **argv, char **azColName) {
     int i;
     for(i = 0; i<argc; i++) {
-        printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
+//        printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
+
+        if( (0 == strcmp("Output",azColName[i])) && (0 != strcmp("",argv[i]))) {
+            strcpy(out_name,argv[i]);
+        }
     }
     printf("\n");
     return 0;
@@ -67,7 +73,7 @@ int create_database() {
 
 
     /* Execute SQL statement */
-    rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
+    rc = sqlite3_exec(db, sql, NULL, 0, &zErrMsg);
 
     if( rc != SQLITE_OK ){
         fprintf(stderr, "SQL error: %s\n", zErrMsg);
@@ -106,7 +112,7 @@ int insert_client(char* str_name) {
                           " VALUES ('%q', '%q');", str_Fname, str_Lname);
 
     /* Execute SQL statement */
-    rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
+    rc = sqlite3_exec(db, sql, NULL, 0, &zErrMsg);
 
     if( rc != SQLITE_OK ){
         fprintf(stderr, "SQL error: %s\n", zErrMsg);
@@ -226,7 +232,7 @@ int main(void)
     //keep listening for data
     while(1)
     {
-        printf("Waiting for data... \n");
+        printf(" Waiting for commands ... \n");
         fflush(stdout);
 
         //try to receive some data, this is a blocking call
@@ -246,33 +252,44 @@ int main(void)
         str_name = strtok (NULL,":\n");
 
 
-        printf(" command detected = %s \n full name = %s \n", rec_cmd, str_name);
+        printf(" command detected = %s \n str_name name = %s \n", rec_cmd, str_name);
+
 
         /* Compare the two strings provided */
         if ( 0 == strcmp(rec_cmd, SET_CMD)) {
             // set command requested
             insert_client(str_name);
-
+            // clear the buffer
+            memset(buf, 0, BUFLEN);
+            strcpy(buf,"Name added Successfully");
         } else if ( 0 == strcmp(rec_cmd, GET_CMD)) {
+
+            memset(out_name, 0, BUFLEN);
+
             // get command requested
             get_info(str_name);
-
+            // clear the buffer
+            memset(buf, 0, BUFLEN);
+            strcpy(buf,out_name);
         } else if (0 == strcmp(rec_cmd, MISSING_CMD) ) {
             int num = find_missing_num(str_name);
             printf(" missing number = %d ", num);
-        }
-        else {
+            // clear the buffer
+            memset(buf, 0, BUFLEN);
+            sprintf(buf,"%d",num);
+        } else {
             printf(" Error : Invalid command");
-            return 1;
+            memset(buf, 0, BUFLEN);
+            strcpy(buf, "Err");
         }
 
 
         //now reply the client with the same data
-        if (sendto(s, buf, recv_len, 0, (struct sockaddr*) &si_other, slen) == -1)
+        if (sendto(s, buf, BUFLEN, 0, (struct sockaddr*) &si_other, slen) == -1)
         {
             exit_error("sendto()");
         }
-        // clear the data received in previous packet
+        // clear the buffer
         memset(buf, 0, BUFLEN);
 
     }
