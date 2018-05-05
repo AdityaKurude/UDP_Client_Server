@@ -23,5 +23,5 @@ $(TARGET): $(OBJECTS)
 	$(CC) $(DEBUG) $(OBJECTS) -Wall $(LIBS) -o $@
 
 clean:
-	-rm -f *.o
+	-rm -f *.o *.db
 	-rm -f $(TARGET)

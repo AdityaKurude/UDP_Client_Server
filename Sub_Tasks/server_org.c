@@ -1,9 +1,6 @@
-/*
-    Simple udp server
-*/
-#include<stdio.h> //printf
-#include<string.h> //memset
-#include<stdlib.h> //exit(0);
+#include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
 #include<arpa/inet.h>
 #include<sys/socket.h>
  
