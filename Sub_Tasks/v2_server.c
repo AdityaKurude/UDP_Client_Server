@@ -163,6 +163,7 @@ int find_missing_num(char* str_numbers) {
     printf ("Splitting string \"%s\" into tokens:\n",str_numbers);
     str_numbers = strtok (str_numbers,",");
     int sum = 0;
+
     while (str_numbers != NULL) {
         sum += atoi(str_numbers);
         str_numbers = strtok (NULL, ",");

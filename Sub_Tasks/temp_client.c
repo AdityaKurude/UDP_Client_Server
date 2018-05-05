@@ -26,9 +26,9 @@ int main(int argc, char *argv[]) {
 
     struct sockaddr_in si_me, si_other, addr;
      
-    int s, i, slen = sizeof(si_other) , recv_len;
+    int s, slen = sizeof(si_other) , recv_len;
     char buf[BUFLEN];
-         char message[BUFLEN];
+    char message[BUFLEN];
     //create a UDP socket
     if ((s=socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
     {

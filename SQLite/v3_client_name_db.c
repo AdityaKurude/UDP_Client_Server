@@ -132,55 +132,27 @@ void get_info(char* str_name) {
     rc = sqlite3_open(DB_NAME, &db);
 
     if( rc ) {
-       fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
-//       return(0);
+        fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
+        //       return(0);
     } else {
-       fprintf(stderr, "Opened database successfully\n");
+        fprintf(stderr, "Opened database successfully\n");
     }
 
     /* Create SQL statement */
- //   sql = "SELECT * from COMPANY";
-
-    /* Create SQL statement */
-
-
-        sql = sqlite3_mprintf("SELECT *," \
-                              " CASE " \
-                              " WHEN FIRST_NAME == '%q' OR LAST_NAME == '%q' AND FIRST_NAME == '%q' THEN LAST_NAME " \
-                              " WHEN FIRST_NAME == '%q' OR LAST_NAME == '%q' AND LAST_NAME == '%q' THEN FIRST_NAME " \
-                              " ELSE '' END as Output  FROM TABLE_NAME ;", str_name, str_name, str_name, str_name, str_name, str_name);
-
-
-//        sql = sqlite3_mprintf("SELECT * FROM TABLE_NAME" \
-//                          " WHERE FIRST_NAME == '%q' OR LAST_NAME == '%q'  ;", str_name, str_name);
-
-
-//        sql = sqlite3_mprintf(        " SELECT * " \
-//                                      " FROM TABLE_NAME " \
-//                                      " WHERE EXISTS (SELECT * " \
-//                                                    " FROM TABLE_NAME " \
-//                                                    " WHERE FIRST_NAME == 'Dora' OR LAST_NAME == 'Dora'); ");
-
-    // gives all names as output
-//    sql = sqlite3_mprintf("SELECT FIRST_NAME,LAST_NAME," \
-//                          "CASE " \
-//                          " WHEN FIRST_NAME IS NOT NULL AND FIRST_NAME == '%q' THEN LAST_NAME " \
-//                          " WHEN LAST_NAME IS NOT NULL AND LAST_NAME == '%q' THEN FIRST_NAME " \
-//                          " ELSE '' END as Output FROM TABLE_NAME;", str_name);
-
-//    sql = sqlite3_mprintf("SELECT FIRST_NAME,LAST_NAME, CASE WHEN FIRST_NAME IS NOT NULL AND FIRST_NAME == '%q' THEN 'NAME present' ELSE 'wahhhhhhhhhhhh Name NULL' END as LAST_NAME FROM TABLE_NAME;", str_name);
-
-//    sql = "SELECT FIRST_NAME,LAST_NAME CASE WHEN FIRST_NAME IS NOT NULL AND FIRST_NAME == '%q' THEN 'NAME present' ELSE 'wahhhhhhhhhhhh Name NULL' END as NAME FROM COMPANY";
-
+    sql = sqlite3_mprintf("SELECT *," \
+                          " CASE " \
+                          " WHEN FIRST_NAME == '%q' OR LAST_NAME == '%q' AND FIRST_NAME == '%q' THEN LAST_NAME " \
+                          " WHEN FIRST_NAME == '%q' OR LAST_NAME == '%q' AND LAST_NAME == '%q' THEN FIRST_NAME " \
+                          " ELSE '' END as Output  FROM TABLE_NAME ;", str_name, str_name, str_name, str_name, str_name, str_name);
 
     /* Execute SQL statement */
     rc = sqlite3_exec(db, sql, callback, (void*)data, &zErrMsg);
 
     if( rc != SQLITE_OK ) {
-       fprintf(stderr, "SQL error: %s\n", zErrMsg);
-       sqlite3_free(zErrMsg);
+        fprintf(stderr, "SQL error: %s\n", zErrMsg);
+        sqlite3_free(zErrMsg);
     } else {
-       fprintf(stdout, "Operation done successfully\n");
+        fprintf(stdout, "Operation done successfully\n");
     }
     sqlite3_close(db);
 }

@@ -9,8 +9,8 @@
  
 #define BUFLEN 512  //Max length of buffer
 #define IP      "127.0.0.1"
-#define SND_PORT 5000   //The port on which to listen for incoming data
-#define REC_PORT 5001   //The port on which to listen for incoming data
+#define SND_PORT 5000   //port to send data
+#define REC_PORT 5001   //port on which to listen for incoming data
  
 void die(char *s)
 {
@@ -22,7 +22,7 @@ int main(void)
 {
     struct sockaddr_in si_me, si_other, addr;
      
-    int s, i, slen = sizeof(si_other) , recv_len;
+    int s, slen = sizeof(si_other) , recv_len;
     char buf[BUFLEN];
      
     //create a UDP socket

@@ -51,7 +51,6 @@ int main(int argc, char *argv[]) {
         exit_error("bind");
     }
 
-
     while (1) {
         printf("Enter message : ");
         gets(message);
